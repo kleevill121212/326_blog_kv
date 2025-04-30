@@ -1,0 +1,14 @@
+[
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/welcome/index.html",
+      "/posts/post-with-code/index.html",
+      "/posts/05-pvalues/index.html",
+      "/posts/04-bayes/index.html",
+      "/posts/03-confidence/index.html",
+      "/posts/02-essay/index.html",
+      "/posts/01-simulation/index.html"
+    ]
+  }
+]
