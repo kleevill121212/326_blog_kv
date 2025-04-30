@@ -1,0 +1,56 @@
+---
+title: "Mini Project 2"
+---
+
+# A Meaningful Story
+
+Title: A Statistician’s Trip To The Mountain
+
+Terms: Estimator, Parameter, Estimate, Random Variable, Random Sample, Bias, Variance,
+Consistent, Likelihood
+
+One fine evening, an adventurous Laurentian decided to take a trip down to Whiteface
+Mountain the next morning for a nice powder day. He is very familiar with this drive from his own
+experiences, but also the experiences of his teammates over the years. He wonders if he has
+enough time to make it to the mountain for the first lift at 8:30 am and stop at Dunkin Donuts for
+a breakfast sandwich. His goal is to find out what time he needs to leave. He has taken some
+stats classes at St. Lawrence, so he feels like he is well-equipped to estimate the likelihood of
+arriving at the mountain on time while making his pit stop at Dunkin Donuts. A quick Google
+search provides the Laurentian with a population mean value for the time it takes to make it
+through a Dunkin Donuts line, which is 2.9 minutes. This parameter, the population mean, could
+prove to be useful! He knows, however, that with Dunkin Donuts being a very large chain with
+hundreds of locations across the country, the variance in that time is probably fairly high,
+especially considering his local Dunkin is in Canton New York. That said, there is some
+fluctuation with the time spent in that line from day to day, location to location.
+
+He figures the good way to estimate the time in the line is by collecting a random
+sample. Unfortunately, this student does not have access to every Dunkin customer in the USA,
+so his contacts will have to suffice. To do his best to make the sample random, although it is
+constrained to his contacts, he asks Siri to pick 10 random contacts from his phone. He then
+texts each of them to ask how long it takes them to get through a Dunkin drive-through. He gets
+his responses and takes note of these values. These random variables produce the following
+values: 5 minutes, 2 minutes, 3.5 minutes, 10 minutes, 1 minute, 2 minutes, 3 minutes, 1
+minute, 30 seconds, and 4 minutes. So for his calculations, he will use the sample mean as an
+estimator for the population mean. He discovers that the estimator produces an estimate of 3.2
+minutes. This student is pretty sharp, and he knows that the sample mean tends to be an
+unbiased estimator of the population mean, that is to say, that the expectation of the sample
+mean is equal to the population mean. So the slight difference between 3.2 and 2.9 does not
+worry him in the slightest. There is no reason to believe there is bias in his estimator, so he feels
+pretty confident about using it to plan his trip. It also confirms that the Canton location seems to
+be right in line with the population mean. He is getting pretty hungry just thinking about his trip in
+the morning. He also wants to know if his estimator is consistent, to make sure he maximizes
+the efficiency of his trip, so he calls up 5 more people to get their input. They reply with the
+following values: 5,1,2,2.5, and 1.5 minutes. The average here is 2.4, which brings the total
+average towards the true population mean of 2.9. He is thinking about ordering a sausage egg
+and cheese on a biscuit on his way to the mountain, which should be good fuel to ski some
+powder.
+
+To cross his T’s and dot his I’s, he wants to look into some of the outliers and plot his
+data. He notices that the data points form a bell-shaped curve. The astute stats minor
+recognizes this as a Normal Distribution. He also knows that based on his data, the variance is
+not too high, in addition, the population mean is derived from a far larger number of data points.
+This makes sense to him because he is using a sample mean to estimate a population mean.
+He feels pretty good about his estimate of 2.9 minutes in the lineup, thus making his total travel
+time 1 hour and 50 minutes, plus 3! So he needs to leave at 6:37 am to make it for the first lift!
+So he goes ahead and sets his alarm for 6:30 am, packs up his ski bag, and gets ready for an
+awesome powder day at Whiteface Mountain.

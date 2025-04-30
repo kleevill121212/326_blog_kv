@@ -1,0 +1,88 @@
+---
+title: "Mini Project 4"
+---
+
+# Bayesian Analysis
+
+```{r}
+
+# Prior 1
+library(tidyverse)
+target_mean <- 44/66
+alphas <- seq(0.1, 200, length.out = 500)
+betas <- 0.45 * alphas
+param_df <- tibble(alphas, betas)
+param_df <- param_df |> mutate(vars = 
+                                 (alphas*betas)/((alphas+betas)^2 * 
+                                                   (alphas+betas+1)))
+target_var <- 0.05657^2
+param_df <- param_df |> mutate(dist_to_target = abs(vars - target_var))
+param_df
+param_df |> filter(dist_to_target == min(dist_to_target))
+
+
+library(tidyverse)
+## Prior 2
+
+alphas <- seq(0.1, 2000, length.out = 2000)
+betas <- (alphas * (1 - 0.75)) / 0.75  
+
+target_prob <- 0.10
+prob_less_0.7 <- pbeta(0.7, alphas, betas) 
+
+tibble(alphas, betas, prob_less_0.7) |>
+  mutate(close_to_target = abs(prob_less_0.7 - target_prob)) |>
+  filter(close_to_target == min(close_to_target))
+
+
+library(tidyverse)
+ps <- seq(0, 1, length.out = 1000)
+informative_alpha_1 <- 45.36
+informative_beta_1 <- 20.41
+informative_alpha_2 <- 95.14
+informative_beta_2 <- 31.71
+noninformative_alpha <- 1
+noninformative_beta <- 1
+
+informative_prior_1 <- dbeta(ps, informative_alpha_1,
+informative_beta_1)
+informative_prior_2 <- dbeta(ps, informative_alpha_2,
+informative_beta_2)
+noninformative_prior <- dbeta(ps,
+noninformative_alpha, noninformative_beta)
+prior_plot <- tibble(ps, informative_prior_1, informative_prior_2, noninformative_prior) |>
+pivot_longer(2:4, names_to = "distribution", values_to = "density")
+ggplot(data = prior_plot, aes(x = ps, y = density, colour = distribution)) +
+geom_line() +
+scale_colour_viridis_d(end = 0.9) +
+theme_minimal() +
+labs(x = "p")
+
+
+library(tidyverse)
+ps <- seq(0, 1, length.out = 1000)
+post_alpha_1 <- 45.36 + 56
+post_beta_1 <- 20.41 + 28
+post_alpha_2 <- 95.14 + 56
+post_beta_2 <- 31.71 + 28
+post_alpha_3 <- 1 + 56
+post_beta_3 <- 1 + 28
+
+post_1 <- dbeta(ps, post_alpha_1,post_beta_1)
+post_2 <- dbeta(ps, post_alpha_2,post_beta_2)
+post_3 <- dbeta(ps, post_alpha_3,post_beta_3)
+post_plot <- tibble(ps, post_1, post_2, post_3) |>
+pivot_longer(2:4, names_to = "distribution", values_to = "density")
+ggplot(data = post_plot, aes(x = ps, y = density, colour = distribution)) +
+geom_line() +
+scale_colour_viridis_d(end = 0.9) +
+theme_minimal() +
+labs(x = "p")
+
+
+qbeta(c(0.05,0.95), post_alpha_1,post_beta_1)
+qbeta(c(0.05,0.95), post_alpha_2,post_beta_2)
+qbeta(c(0.05,0.95), post_alpha_3,post_beta_3)
+
+
+```

@@ -1,0 +1,5 @@
+---
+title: "Mini Project 3"
+---
+
+# Simulation to Investigate Confidence Intervals
