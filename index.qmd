@@ -3,7 +3,7 @@ title: "Kobe's Blog"
 listing:
   contents: posts
   sort: "title asc"
-  type: default
+  type: table
   categories: true
   sort-ui: false
   filter-ui: false
