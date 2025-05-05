@@ -86,3 +86,45 @@ qbeta(c(0.05,0.95), post_alpha_3,post_beta_3)
 
 
 ```
+
+# Write Up
+
+	Rafael Nadal has a reputation of being the greatest men’s clay-court tennis player of all time. I am going to put that reputation to the test by analyzing data from the 2020 French Open, where Nadal faced Djokovic, a fierce opponent who is in the greatest of all time conversation for men's tennis on all surfaces. We will be looking at some informative prior distributions, one from an announcer and another stemming from a clay court match played by Nadal in the previous year. We will also use a non-informative prior, tallying 3 prior distributions that we will analyze alongside our data. When determining our priors, we have some information that we can work with to derive the prior with the proper parameter values. Some of the information provided is that in a previous Nadal match, Rafa won 46/66 of the points on his own serve, with a standard error of 0.05657. This example is Binomial, so the conjugate prior is a Beta distribution. We find the prior to be Beta\~(45.36, 20.41)
+
+	For our second prior, we know that the announcer believes Nadal wins about 0.75 of the points on his serve against Djokovic. They are also “almost sure” that nadal wins no less than 0.7 of the points he serves against Djokovic. We can leverage our Hockey example here, and look for a desired mean of 0.75, along with the probability the mean is less that 0.7 equal to something like 0.1. Since our announcer is “almost sure”, I decided to assign that certainty to about 0.9. So by using this information and the sequence function in R, we find that our second prior distribution follows a Beta\~(95.14, 31.71). For our third and final prior, we want a non-informative prior to work with. I decided to use a Beta\~(1,1). The reason behind this is that for this prior to be non-informative, we want the values to be dominated by the data. Since the parameter values are so small, we will be in a great position for the data to do all the talking when combined with prior number 3. We can see the priors layered on top of each other below: 
+
+![](https://lh7-rt.googleusercontent.com/docsz/AD_4nXe7yagtuG8JLdNcz19J4y0t8W4cAmP3GC_d23H2HKJTTgxugrjNbri153dAm2eel3R763p_1GyByF6Gg4RtpZISXqan9mU3Ybi9aAFvb35B_MH1hor9IZ1cjeM_krBOC9okMrcl9A?key=7XsoAh2NeJSWHRXJVqT46ULX)
+
+	Now that we have our 3 prior distributions, we are ready to go ahead and analyze them in combination with the data. The data comes from the 2020 French Open, where Nadal won 56/84 points on his serve. So we can now made an adjustment to each of the priors such that:
+
+Posterior 1: Beta\~(45.36 + 56, 20.41 + 28) 
+
+	Mean = 0.677
+
+Posterior 2: Beta\~(95.14 +56, 31.71 + 28)
+
+	Mean = 0.717
+
+Posterior 3: Beta\~(1 + 56, 1 + 28)
+
+	Mean = 0.663
+
+![](https://lh7-rt.googleusercontent.com/docsz/AD_4nXf-zUwRejfpG1L5Vf_T1NbglM0VrRcGAQEFj9G9vVowVOk2yWd2gUMZW_97s8xfQgQeqbHG0Ug7SElD_Bgasj9fJzx18l4KCxQA-1BI7DZxskIzZocatVzquRKMdMcYAEuZG6b4?key=7XsoAh2NeJSWHRXJVqT46ULX)
+
+\
+
+We can now see the posteriors layered on top of each other below:
+
+\
+
+To determine the credible intervals for each of the posteriors, we can use the qbeta function in R with the following form: qbeta(c(0.05,0.95), alpha, beta). When we input the parameters for each of our posterior distributions, we end up with 90% credible intervals:
+
+Posterior 1: (0.613, 0.738)
+
+Posterior 2: (0.665, 0.767)
+
+Posterior 3: (0.577, 0.744)
+
+When examining the results of our analysis, we can see that the posteriors are all a bit different than one another. First of all, Posterior 3 reflects the data entirely, since the prior gets dominated. In the match against Novak, Rafa won a smaller proportion of points in comparison to the other priors in our analysis. This may be due to Novak being a formidable opponent, an assumption that we cannot account for here in the model, that is strength of opponent. The mean from the Data is equal to 0.667, whereas the mean for Priors 1 and 2 are 0.697 and 0.75. These higher mean values are reflected in the position of the distributions along the x axis. Posterior 2 is further to the right, since its prior had the highest mean and highest absolute parameter values, whereas Posterior 1 falls in between 2 and 3. It is also notable that the variance of each posterior is different, specifically that of posterior 2. It is quite a bit tighter in spread than the other distributions, and that is due to the high absolute values of the parameters. These values are higher because of the lower probability that Rafa’s win percentage is below 0.7. I chose 0.1, but if I were to choose an even lower probability, that would increase the values of alpha and beta even further to dominate the data more. Since the value of the denominator → (alpha + beta)\^2 (alpha + beta +1) is higher for this distribution, the variance is  lower.
+
+	If I had to choose a distribution, I would likely choose the second one. Not only does it have the lowest variance, but I am also partial to the opinion of an announcer who has watched more than one match. Although matches have a significant number of points played, when we talk about the greatest, we need to assess a whole body of work. It is clear that no matter what distribution you choose, the 90% credible interval lower bound is still above 0.5. In general, I saw the importance of picking a good prior distribution. Choosing a non-informative prior weighs the performance against Djokovic too much, perhaps underscoring Nadal’s dominance on clay courts. Great tennis players like Roger Federer win barely more than 50% of their points played, so for Nadal to be putting up these numbers on clay provides a very solid argument for his spot on the clay throne.

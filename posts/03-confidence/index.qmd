@@ -3,3 +3,91 @@ title: "Mini Project 3"
 ---
 
 # Simulation to Investigate Confidence Intervals
+
+```{r}
+
+## AI Assistance Used
+
+library(tidyverse)
+
+
+###Our Parameters
+sample_sizes <- c(12, 555, 8090)
+population_proportions <- c(0.55, 0.15)
+confidence_level <- 0.90
+z_critical <- qnorm(1 - (1 - confidence_level) / 2)
+n_simulations <- 5000
+
+###Creating the Simulation Function
+run_simulation <- function(n, p) {
+  coverage_count <- 0
+  interval_widths <- numeric(n_simulations)
+  
+  for (i in seq_len(n_simulations)) {
+    sample <- rbinom(1, n, p) / n  ###Generate sample proportion
+    temp <- replicate(2, sample * (1 - sample))
+    se <- ifelse(mean(temp) > 0, sqrt(mean(temp) / n), 0)  ###Standard error check
+    
+    ###Confidence Interval
+    ci_lower <- sample - z_critical * se
+    ci_upper <- sample + z_critical * se
+    
+    ###Coverage
+    if (p >= ci_lower & p <= ci_upper) {
+      coverage_count <- coverage_count + 1
+    }
+    
+    ###Interval Width
+    interval_widths[i] <- abs(ci_upper - ci_lower)
+  }
+  
+  ###Final Computation
+  coverage_rate <- coverage_count / n_simulations
+  avg_width <- mean(interval_widths)
+  
+  return(tibble(Sample_Size = n, Population_Proportion = p, Coverage_Rate = coverage_rate, Average_Width = avg_width))
+}
+
+###Running Sims
+results_list <- expand.grid(Sample_Size = sample_sizes, Population_Proportion = population_proportions) %>%
+  pmap(~ run_simulation(..1, ..2))
+
+results_df <- bind_rows(results_list)
+
+print(results_df)
+
+```
+
+# Write Up
+
+**Results Table**
+
+\
+
+|             |                       |               |               |
+|-------------|-----------------------|---------------|---------------|
+| Sample Size | Population Proportion | Coverage Rate | Average Width |
+| 12          | 0.55                  | 0.9256        | 0.45099       |
+| 555         | 0.55                  | 0.9062        | 0.06940       |
+| 8090        | 0.55                  | 0.8928        | 0.01819       |
+| 12          | 0.15                  | 0.8290        | 0.29356       |
+| 555         | 0.15                  | 0.8982        | 0.04976       |
+| 8090        | 0.15                  | 0.9094        | 0.01305       |
+
+\
+
+**Large Sample Assumption Calculation**
+
+```{r}
+knitr::include_graphics("../../images/largeness.jpg")
+
+
+```
+
+\
+
+If we take a look at the selected sample sizes, I went for a very small sample of 12, a large sample of 555, and a very large sample of 8090. If we examine both settings where the sample is 12, we can see a considerable deviation from the ideal coverage rate we are looking for. Since the confidence interval we are working with is 90%, we want that coverage rate to approach that value as well. However, as we can see with the assumption calculation, it violates the large n assumption at least once for each of those settings. This lets us know that the value of n is too small. It is also worth noting that both the p = 0.15 and p = 0.55 have considerable average widths, indicating a lack of precision when it comes to the Confidence Interval. Interestingly, the average width is larger for p = 0.55 compared to p = 0.15. 
+
+Moving on to the next sample size of n = 555, we can see a few stark differences between those two settings and the small n setting. First of all, we can see that the coverage rates for both of these settings (p = 0.15 and p = 0.55) are extremely close to the desired value of 0.90. Additionally, when we examine the results of the large n test, we can see that each of these two settings passes. The difference from 0.9 in the coverage rate for each setting is negligible, with one slightly higher and the other slightly lower. More interesting to note is that we can see a continued trend of the average width being wider for the setting that is closer to p = 0.5. Although both settings saw a dramatic ‘improvement’ in their coverage rates, it is still true that the setting of p = 0.55 has a wider average width. 
+
+Lastly, when examining the final two settings where n = 8090, a few additional trends emerge, while some are also confirmed. The coverage rates are about the same as the previous setting when looking at how far off they are from 0.9. However, if we look closely, we can see that the coverage rate for the setting of p = 0.55 is descending as n increases, whereas the setting of p = 0.15 is ascending as n increases. We can also confirm what was observed in the previous 4 settings, where no matter the n, we see a larger average width in the setting closer to p = 0.5. However, as the value of n increases, that discrepancy becomes less and less apparent.

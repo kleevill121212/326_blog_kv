@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -139,6 +173,139 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="simulation-to-investigate-confidence-intervals" class="level1">
 <h1>Simulation to Investigate Confidence Intervals</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">## AI Assistance Used</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">###Our Parameters</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>sample_sizes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">555</span>, <span class="dv">8090</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>population_proportions <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.55</span>, <span class="fl">0.15</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>confidence_level <span class="ot">&lt;-</span> <span class="fl">0.90</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>z_critical <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> (<span class="dv">1</span> <span class="sc">-</span> confidence_level) <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>n_simulations <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="do">###Creating the Simulation Function</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>run_simulation <span class="ot">&lt;-</span> <span class="cf">function</span>(n, p) {</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  coverage_count <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  interval_widths <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_simulations)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(n_simulations)) {</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    sample <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="dv">1</span>, n, p) <span class="sc">/</span> n  <span class="do">###Generate sample proportion</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    temp <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">2</span>, sample <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> sample))</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    se <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">mean</span>(temp) <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="fu">sqrt</span>(<span class="fu">mean</span>(temp) <span class="sc">/</span> n), <span class="dv">0</span>)  <span class="do">###Standard error check</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="do">###Confidence Interval</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    ci_lower <span class="ot">&lt;-</span> sample <span class="sc">-</span> z_critical <span class="sc">*</span> se</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    ci_upper <span class="ot">&lt;-</span> sample <span class="sc">+</span> z_critical <span class="sc">*</span> se</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="do">###Coverage</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (p <span class="sc">&gt;=</span> ci_lower <span class="sc">&amp;</span> p <span class="sc">&lt;=</span> ci_upper) {</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>      coverage_count <span class="ot">&lt;-</span> coverage_count <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="do">###Interval Width</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    interval_widths[i] <span class="ot">&lt;-</span> <span class="fu">abs</span>(ci_upper <span class="sc">-</span> ci_lower)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="do">###Final Computation</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  coverage_rate <span class="ot">&lt;-</span> coverage_count <span class="sc">/</span> n_simulations</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  avg_width <span class="ot">&lt;-</span> <span class="fu">mean</span>(interval_widths)</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">tibble</span>(<span class="at">Sample_Size =</span> n, <span class="at">Population_Proportion =</span> p, <span class="at">Coverage_Rate =</span> coverage_rate, <span class="at">Average_Width =</span> avg_width))</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="do">###Running Sims</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>results_list <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">Sample_Size =</span> sample_sizes, <span class="at">Population_Proportion =</span> population_proportions) <span class="sc">%&gt;%</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pmap</span>(<span class="sc">~</span> <span class="fu">run_simulation</span>(..<span class="dv">1</span>, ..<span class="dv">2</span>))</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>results_df <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(results_list)</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(results_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 4
+  Sample_Size Population_Proportion Coverage_Rate Average_Width
+        &lt;dbl&gt;                 &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;
+1          12                  0.55         0.928        0.452 
+2         555                  0.55         0.907        0.0694
+3        8090                  0.55         0.904        0.0182
+4          12                  0.15         0.836        0.295 
+5         555                  0.15         0.900        0.0498
+6        8090                  0.15         0.903        0.0131</code></pre>
+</div>
+</div>
+</section>
+<section id="write-up" class="level1">
+<h1>Write Up</h1>
+<p><strong>Results Table</strong></p>
+<p><br>
+</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td>Sample Size</td>
+<td>Population Proportion</td>
+<td>Coverage Rate</td>
+<td>Average Width</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>0.55</td>
+<td>0.9256</td>
+<td>0.45099</td>
+</tr>
+<tr class="odd">
+<td>555</td>
+<td>0.55</td>
+<td>0.9062</td>
+<td>0.06940</td>
+</tr>
+<tr class="even">
+<td>8090</td>
+<td>0.55</td>
+<td>0.8928</td>
+<td>0.01819</td>
+</tr>
+<tr class="odd">
+<td>12</td>
+<td>0.15</td>
+<td>0.8290</td>
+<td>0.29356</td>
+</tr>
+<tr class="even">
+<td>555</td>
+<td>0.15</td>
+<td>0.8982</td>
+<td>0.04976</td>
+</tr>
+<tr class="odd">
+<td>8090</td>
+<td>0.15</td>
+<td>0.9094</td>
+<td>0.01305</td>
+</tr>
+</tbody>
+</table>
+<p><br>
+</p>
+<p><strong>Large Sample Assumption Calculation</strong></p>
+<p><br>
+</p>
+<p><img src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXeeHto-fCuLPj6hswTdGwBkuadYAurE5RI2GOq6glJk6j_UcYwe6t8hEDRsxWevxnV59CNLhB1DlSsuEh1u7M3NUwasExrtuRSA_L1FG_-DTM8pn-10j37Z4aUx1Nji_Ty3aZrv0g?key=YBLkOb1DZQib0m_7xyco_w0c.png" class="img-fluid"></p>
+<p>If we take a look at the selected sample sizes, I went for a very small sample of 12, a large sample of 555, and a very large sample of 8090. If we examine both settings where the sample is 12, we can see a considerable deviation from the ideal coverage rate we are looking for. Since the confidence interval we are working with is 90%, we want that coverage rate to approach that value as well. However, as we can see with the assumption calculation, it violates the large n assumption at least once for each of those settings. This lets us know that the value of n is too small. It is also worth noting that both the p = 0.15 and p = 0.55 have considerable average widths, indicating a lack of precision when it comes to the Confidence Interval. Interestingly, the average width is larger for p = 0.55 compared to p = 0.15.&nbsp;</p>
+<p>Moving on to the next sample size of n = 555, we can see a few stark differences between those two settings and the small n setting. First of all, we can see that the coverage rates for both of these settings (p = 0.15 and p = 0.55) are extremely close to the desired value of 0.90. Additionally, when we examine the results of the large n test, we can see that each of these two settings passes. The difference from 0.9 in the coverage rate for each setting is negligible, with one slightly higher and the other slightly lower. More interesting to note is that we can see a continued trend of the average width being wider for the setting that is closer to p = 0.5. Although both settings saw a dramatic ‘improvement’ in their coverage rates, it is still true that the setting of p = 0.55 has a wider average width.&nbsp;</p>
+<p>Lastly, when examining the final two settings where n = 8090, a few additional trends emerge, while some are also confirmed. The coverage rates are about the same as the previous setting when looking at how far off they are from 0.9. However, if we look closely, we can see that the coverage rate for the setting of p = 0.55 is descending as n increases, whereas the setting of p = 0.15 is ascending as n increases. We can also confirm what was observed in the previous 4 settings, where no matter the n, we see a larger average width in the setting closer to p = 0.5. However, as the value of n increases, that discrepancy becomes less and less apparent.</p>
 
 
 </section>

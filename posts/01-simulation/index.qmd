@@ -330,3 +330,17 @@ ggplot(data = samp_max_df, aes(x = x, y = density_Ymax)) +
   geom_line() +
   theme_minimal()
 ```
+
+# Write Up
+
+Mini Project 1 - Write Up
+
+Kobe Villeneuve
+
+Question #1
+
+As discussed in class, the Standard Error for Ymin and Ymax demonstrated similarities when the distribution being used was symmetric about the mean, such as a Normal or Uniform distribution. We can see this in the results, which show that the standard error for these distributions is nearly identical in the cases of both Ymin and Ymax. For distributions that are not symmetric, it depends on the skewness and overall shape of that distribution to assess the SE of Ymin and Ymax. With the exponential, we see a greater spread towards the higher values, thus a greater SE in Ymax. Interestingly with the Beta distribution, it can be skewed in both directions depending on the values of the parameters. For ours, alpha is greater than beta, thus we can see a left skew and the SE of Ymin is greater than Ymax. So for a general rule, if the distribution is symmetric, then SE Ymin and SE Ymax are approximately equal. If it is left-skewed, then the SE of Ymin is greater, and if it is right-skewed then the SE of Ymax is greater.
+
+Question #2
+
+The calculated values are quite close to the simulation values. Attached is hand written work.
